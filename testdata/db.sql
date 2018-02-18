@@ -2,19 +2,8 @@ DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS payment_attribute;
 DROP TABLE IF EXISTS fx;
 DROP TABLE IF EXISTS sender_charge;
-DROP TABLE IF EXISTS charge_information;
+DROP TABLE IF EXISTS charges_information;
 DROP TABLE IF EXISTS party;
-
-CREATE TABLE payment
-(
-  id UUID PRIMARY KEY,
-  type VARCHAR(120) NOT NULL,
-  version INTEGER NOT NULL,
-  organisation_id UUID NOT NULL,
-  attribute_id INTEGER,
-  FOREIGN KEY (attribute_id) REFERENCES payment_attribute (id) ON DELETE CASCADE
-);
-
 
 CREATE TABLE party
 (
@@ -29,36 +18,36 @@ CREATE TABLE party
   name VARCHAR(255)
 );
 
-CREATE TABLE charge_information
+CREATE TABLE charges_information
 (
   id SERIAL PRIMARY KEY,
   bearer_code VARCHAR(255),
-  receiver_charges_amount FLOAT,
+  receiver_charges_amount VARCHAR(255),
   receiver_charges_currency VARCHAR(255)
 );
 
 CREATE TABLE sender_charge
 (
   id SERIAL PRIMARY KEY,
-  amount FLOAT NOT NULL,
-  currency VARCHAR(255) NOT NULL,
-  charge_information_id INTEGER NOT NULL,
-  FOREIGN KEY (charge_information_id) REFERENCES charge_information (id) ON DELETE CASCADE
+  amount VARCHAR(255),
+  currency VARCHAR(255),
+  charges_information_id INTEGER NOT NULL,
+  FOREIGN KEY (charges_information_id) REFERENCES charges_information (id) ON DELETE CASCADE
 );
 
 CREATE TABLE fx
 (
   id SERIAL PRIMARY KEY,
   contract_reference VARCHAR(255),
-  exchange_rate FLOAT,
-  original_amount FLOAT,
+  exchange_rate VARCHAR(255),
+  original_amount VARCHAR(255),
   original_currency VARCHAR(255)
 );
 
 CREATE TABLE payment_attribute
 (
   id SERIAL PRIMARY KEY,
-  amount FLOAT NOT NULL,
+  amount VARCHAR(255),
   currency VARCHAR(255),
   end_to_end_reference VARCHAR(255),
   numeric_reference VARCHAR(255),
@@ -76,10 +65,19 @@ CREATE TABLE payment_attribute
   sponsor_party_id INTEGER NOT NULL,
   fx_id INTEGER NOT NULL,
 
-  FOREIGN KEY (charges_information_id) REFERENCES charge_information (id) ON DELETE CASCADE,
+  FOREIGN KEY (charges_information_id) REFERENCES charges_information (id) ON DELETE CASCADE,
   FOREIGN KEY (beneficiary_party_id) REFERENCES party (id) ON DELETE CASCADE,
   FOREIGN KEY (debtor_party_id) REFERENCES party (id) ON DELETE CASCADE,
   FOREIGN KEY (sponsor_party_id) REFERENCES party (id) ON DELETE CASCADE,
   FOREIGN KEY (fx_id) REFERENCES fx (id) ON DELETE CASCADE
 );
 
+CREATE TABLE payment
+(
+  id UUID PRIMARY KEY,
+  type VARCHAR(120) NOT NULL,
+  version INTEGER NOT NULL,
+  organisation_id UUID NOT NULL,
+  payment_attribute_id INTEGER,
+  FOREIGN KEY (payment_attribute_id) REFERENCES payment_attribute (id) ON DELETE CASCADE
+);

@@ -2,23 +2,23 @@ package services
 
 import (
 	"github.com/rogersole/payments-basic-api/app"
-	"github.com/rogersole/payments-basic-api/models"
+	"github.com/rogersole/payments-basic-api/dtos"
 )
 
 // paymentDAO specifies the interface of the payment DAO needed by PaymentService.
 type paymentDAO interface {
 	// Get returns the payment with the specified ID
-	Get(rs app.RequestScope, id models.CustomUUID) (*models.Payment, error)
+	Get(rs app.RequestScope, id dtos.CustomUUID) (*dtos.Payment, error)
 	// Count returns the number of payments
 	Count(rs app.RequestScope) (int, error)
 	// Query returns the list of payments with the given offset and limit
-	Query(rs app.RequestScope, offset, limit int) ([]models.Payment, error)
+	Query(rs app.RequestScope, offset, limit int) ([]dtos.Payment, error)
 	// Create saves a new payment in the storage
-	Create(rs app.RequestScope, payment *models.Payment) error
+	Create(rs app.RequestScope, payment *dtos.Payment) error
 	// Update updates the payment with given ID in the storage
-	Update(rs app.RequestScope, id models.CustomUUID, payment *models.Payment) error
+	Update(rs app.RequestScope, id dtos.CustomUUID, payment *dtos.Payment) error
 	// Delete removes the payment with given ID from the storage
-	Delete(rs app.RequestScope, id models.CustomUUID) error
+	Delete(rs app.RequestScope, id dtos.CustomUUID) error
 }
 
 // PaymentService provides services related with payments
@@ -32,12 +32,12 @@ func NewPaymentService(dao paymentDAO) *PaymentService {
 }
 
 // Get returns the payment with the specified ID
-func (s *PaymentService) Get(rs app.RequestScope, id models.CustomUUID) (*models.Payment, error) {
+func (s *PaymentService) Get(rs app.RequestScope, id dtos.CustomUUID) (*dtos.Payment, error) {
 	return s.dao.Get(rs, id)
 }
 
 // Create creates a new payment
-func (s *PaymentService) Create(rs app.RequestScope, model *models.Payment) (*models.Payment, error) {
+func (s *PaymentService) Create(rs app.RequestScope, model *dtos.Payment) (*dtos.Payment, error) {
 	if err := model.Validate(); err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (s *PaymentService) Create(rs app.RequestScope, model *models.Payment) (*mo
 }
 
 // Update updates the payment with the specified ID
-func (s *PaymentService) Update(rs app.RequestScope, id models.CustomUUID, model *models.Payment) (*models.Payment, error) {
+func (s *PaymentService) Update(rs app.RequestScope, id dtos.CustomUUID, model *dtos.Payment) (*dtos.Payment, error) {
 	if err := model.Validate(); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *PaymentService) Update(rs app.RequestScope, id models.CustomUUID, model
 }
 
 // Delete deletes the payment with the specified ID
-func (s *PaymentService) Delete(rs app.RequestScope, id models.CustomUUID) (*models.Payment, error) {
+func (s *PaymentService) Delete(rs app.RequestScope, id dtos.CustomUUID) (*dtos.Payment, error) {
 	payment, err := s.dao.Get(rs, id)
 	if err != nil {
 		return nil, err
@@ -74,6 +74,6 @@ func (s *PaymentService) Count(rs app.RequestScope) (int, error) {
 }
 
 // Query returns the payments with the specified offset and limit
-func (s *PaymentService) Query(rs app.RequestScope, offset, limit int) ([]models.Payment, error) {
+func (s *PaymentService) Query(rs app.RequestScope, offset, limit int) ([]dtos.Payment, error) {
 	return s.dao.Query(rs, offset, limit)
 }

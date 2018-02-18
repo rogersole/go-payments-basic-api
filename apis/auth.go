@@ -7,8 +7,8 @@ import (
 	"github.com/go-ozzo/ozzo-routing"
 	"github.com/go-ozzo/ozzo-routing/auth"
 	"github.com/rogersole/payments-basic-api/app"
+	"github.com/rogersole/payments-basic-api/dtos"
 	"github.com/rogersole/payments-basic-api/errors"
-	"github.com/rogersole/payments-basic-api/models"
 )
 
 type Credential struct {
@@ -43,9 +43,9 @@ func Auth(signingKey string) routing.Handler {
 	}
 }
 
-func authenticate(c Credential) models.Identity {
+func authenticate(c Credential) dtos.Identity {
 	if c.Username == "demo" && c.Password == "pass" {
-		return &models.User{ID: "100", Name: "demo"}
+		return &dtos.User{ID: "100", Name: "demo"}
 	}
 	return nil
 }

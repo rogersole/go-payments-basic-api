@@ -1,4 +1,4 @@
-package models
+package dtos
 
 import (
 	"fmt"
@@ -69,14 +69,13 @@ func (u CustomUUID) String() string {
 	return u.UUID.String()
 }
 
-/*
 // Payment represents a payment record
 type Payment struct {
 	Id             CustomUUID        `json:"id"`
 	Version        int               `json:"version,omitempty"`
 	OrganisationID CustomUUID        `json:"organisation_id,omitempty"`
 	Type           string            `json:"type,omitempty"`
-	Attributes     PaymentAttributes `json:"attributes,omitempty" db:"attr"`
+	Attributes     PaymentAttributes `json:"attributes,omitempty"`
 }
 
 type PaymentAttributes struct {
@@ -93,10 +92,10 @@ type PaymentAttributes struct {
 	SchemePaymentSubType string             `json:"scheme_payment_sub_type,omitempty"`
 	SchemePaymentType    string             `json:"scheme_payment_type,omitempty"`
 	ChargesInformation   ChargesInformation `json:"charges_information,omitempty"`
-	BeneficiaryParty     Party              `json:"beneficiary_party,omitempty" db:"b_prt"`
-	DebtorParty          Party              `json:"debtor_party,omitempty" db:"d_prt"`
-	SponsorParty         Party              `json:"sponsor_party,omitempty" db:"s_prt"`
-	FX                   FX                 `json:"fx,omitempty" db:"fx"`
+	BeneficiaryParty     Party              `json:"beneficiary_party,omitempty"`
+	DebtorParty          Party              `json:"debtor_party,omitempty"`
+	SponsorParty         Party              `json:"sponsor_party,omitempty"`
+	FX                   FX                 `json:"fx,omitempty"`
 }
 
 type Party struct {
@@ -127,37 +126,6 @@ type FX struct {
 	ExchangeRate      string `json:"exchange_rate,omitempty"`
 	OriginalAmount    string `json:"original_amount,omitempty"`
 	OriginalCurrency  string `json:"original_currency,omitempty"`
-}
-
-*/
-
-type Payment struct {
-	Id         CustomUUID `json:"id"`
-	Name       string     `json:"name"`
-	SubPayment SubPayment `json:"sub_payment"`
-}
-
-type SubPayment struct {
-	Simple string `json:"simple"`
-}
-
-type PaymentDB struct {
-	Id           CustomUUID
-	Name         string
-	SubPaymentId int64
-}
-
-func (c PaymentDB) TableName() string {
-	return "payment"
-}
-
-type SubPaymentDB struct {
-	Id     int64
-	Simple string
-}
-
-func (c SubPaymentDB) TableName() string {
-	return "sub_payment"
 }
 
 // Validate validates the Payment fields.

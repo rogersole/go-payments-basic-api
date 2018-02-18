@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/rogersole/payments-basic-api/app"
-	"github.com/rogersole/payments-basic-api/models"
+	"github.com/rogersole/payments-basic-api/dtos"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +29,7 @@ func TestPaymentService_Get(t *testing.T) {
 
 func TestPaymentService_Create(t *testing.T) {
 	s := NewPaymentService(newMockPaymentDAO())
-	payment, err := s.Create(nil, &models.Payment{
+	payment, err := s.Create(nil, &dtos.Payment{
 		//Name: "ddd",
 		// TODO
 	})
@@ -39,7 +39,7 @@ func TestPaymentService_Create(t *testing.T) {
 	}
 
 	// dao error
-	_, err = s.Create(nil, &models.Payment{
+	_, err = s.Create(nil, &dtos.Payment{
 		//Id:   100,
 		//Name: "ddd",
 		// TODO
@@ -47,7 +47,7 @@ func TestPaymentService_Create(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// validation error
-	_, err = s.Create(nil, &models.Payment{
+	_, err = s.Create(nil, &dtos.Payment{
 		//Name: "",
 		// TODO
 	})
@@ -56,7 +56,7 @@ func TestPaymentService_Create(t *testing.T) {
 
 func TestPaymentService_Update(t *testing.T) {
 	s := NewPaymentService(newMockPaymentDAO())
-	payment, err := s.Update(nil, 2, &models.Payment{
+	payment, err := s.Update(nil, 2, &dtos.Payment{
 		//Name: "ddd",
 		// TODO
 	})
@@ -66,14 +66,14 @@ func TestPaymentService_Update(t *testing.T) {
 	}
 
 	// dao error
-	_, err = s.Update(nil, 100, &models.Payment{
+	_, err = s.Update(nil, 100, &dtos.Payment{
 		//Name: "ddd",
 		// TODO
 	})
 	assert.NotNil(t, err)
 
 	// validation error
-	_, err = s.Update(nil, 2, &models.Payment{
+	_, err = s.Update(nil, 2, &dtos.Payment{
 		Name: "",
 	})
 	assert.NotNil(t, err)
@@ -101,7 +101,7 @@ func TestPaymentService_Query(t *testing.T) {
 
 func newMockPaymentDAO() paymentDAO {
 	return &mockPaymentDAO{
-		records: []models.Payment{
+		records: []dtos.Payment{
 			//{Id: 1, Name: "aaa"},
 			//{Id: 2, Name: "bbb"},
 			//{Id: 3, Name: "ccc"},
@@ -111,10 +111,10 @@ func newMockPaymentDAO() paymentDAO {
 }
 
 type mockPaymentDAO struct {
-	records []models.Payment
+	records []dtos.Payment
 }
 
-func (m *mockPaymentDAO) Get(rs app.RequestScope, id int) (*models.Payment, error) {
+func (m *mockPaymentDAO) Get(rs app.RequestScope, id int) (*dtos.Payment, error) {
 	for _, record := range m.records {
 		if record.Id == id {
 			return &record, nil
@@ -123,7 +123,7 @@ func (m *mockPaymentDAO) Get(rs app.RequestScope, id int) (*models.Payment, erro
 	return nil, errors.New("not found")
 }
 
-func (m *mockPaymentDAO) Query(rs app.RequestScope, offset, limit int) ([]models.Payment, error) {
+func (m *mockPaymentDAO) Query(rs app.RequestScope, offset, limit int) ([]dtos.Payment, error) {
 	return m.records[offset : offset+limit], nil
 }
 
@@ -131,7 +131,7 @@ func (m *mockPaymentDAO) Count(rs app.RequestScope) (int, error) {
 	return len(m.records), nil
 }
 
-func (m *mockPaymentDAO) Create(rs app.RequestScope, payment *models.Payment) error {
+func (m *mockPaymentDAO) Create(rs app.RequestScope, payment *dtos.Payment) error {
 	if payment.Id != 0 {
 		return errors.New("ID cannot be set")
 	}
@@ -140,7 +140,7 @@ func (m *mockPaymentDAO) Create(rs app.RequestScope, payment *models.Payment) er
 	return nil
 }
 
-func (m *mockPaymentDAO) Update(rs app.RequestScope, id int, payment *models.Payment) error {
+func (m *mockPaymentDAO) Update(rs app.RequestScope, id int, payment *dtos.Payment) error {
 	payment.Id = id
 	for i, record := range m.records {
 		if record.Id == id {

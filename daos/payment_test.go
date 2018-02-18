@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/rogersole/payments-basic-api/app"
-	"github.com/rogersole/payments-basic-api/models"
+	"github.com/rogersole/payments-basic-api/dtos"
 	"github.com/rogersole/payments-basic-api/testdata"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestPaymentDAO(t *testing.T) {
 	{
 		// Create
 		testDBCall(db, func(rs app.RequestScope) {
-			payment := &models.Payment{
+			payment := &dtos.Payment{
 				Id:   1000,
 				Name: "tester",
 			}
@@ -44,7 +44,7 @@ func TestPaymentDAO(t *testing.T) {
 	{
 		// Update
 		testDBCall(db, func(rs app.RequestScope) {
-			payment := &models.Payment{
+			payment := &dtos.Payment{
 				//Id:   2,
 				//Name: "tester",
 				// TODO
@@ -57,7 +57,7 @@ func TestPaymentDAO(t *testing.T) {
 	{
 		// Update with error
 		testDBCall(db, func(rs app.RequestScope) {
-			payment := &models.Payment{
+			payment := &dtos.Payment{
 				Id:   2,
 				Name: "tester",
 			}
