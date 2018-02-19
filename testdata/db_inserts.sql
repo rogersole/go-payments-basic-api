@@ -1,19 +1,3 @@
-DROP TABLE IF EXISTS album;
-DROP TABLE IF EXISTS artist;
-
-CREATE TABLE artist
-(
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(120)
-);
-
-CREATE TABLE album
-(
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(160)  NOT NULL,
-    artist_id INTEGER  NOT NULL,
-    FOREIGN KEY (artist_id) REFERENCES artist (id) ON DELETE CASCADE
-);
 
 INSERT INTO artist (name) VALUES ('AC/DC');
 INSERT INTO artist (name) VALUES ('Accept');

@@ -79,7 +79,5 @@ CREATE TABLE payment
   version INTEGER NOT NULL,
   organisation_id UUID NOT NULL,
   payment_attribute_id INTEGER,
-  created_at TIME without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
-  updated_at TIME without time zone,
   FOREIGN KEY (payment_attribute_id) REFERENCES payment_attribute (id) ON DELETE CASCADE
 );

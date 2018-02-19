@@ -37,10 +37,10 @@ func ResetDB() *dbx.DB {
 }
 
 func getSQLFile() string {
-	if _, err := os.Stat("testdata/db.sql"); err == nil {
-		return "testdata/db.sql"
+	if _, err := os.Stat("testdata/db_structure.sql"); err == nil {
+		return "testdata/db_structure.sql"
 	}
-	return "../testdata/db.sql"
+	return "../testdata/db_structure.sql"
 }
 
 func runSQLFile(db *dbx.DB, file string) error {

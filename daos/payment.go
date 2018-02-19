@@ -17,6 +17,10 @@ func NewPaymentDAO() *PaymentDAO {
 
 // Get reads the payment with the specified ID from the database
 func (dao *PaymentDAO) Get(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, error) {
+	return dao.getSimple(rs, id)
+}
+
+func (dao *PaymentDAO) getSimple(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, error) {
 	var paymentDB PaymentDB
 	if err := rs.Tx().Select().Model(id, &paymentDB); err != nil {
 		return nil, err
@@ -135,14 +139,48 @@ func (dao *PaymentDAO) Update(rs app.RequestScope, id uuid.UUID, payment *dtos.P
 
 // Delete deletes a payment with the specified ID from the database.
 func (dao *PaymentDAO) Delete(rs app.RequestScope, id uuid.UUID) error {
-
-	// TODO
-
-	payment, err := dao.Get(rs, id)
-	if err != nil {
+	var paymentDB PaymentDB
+	if err := rs.Tx().Select().Model(id, &paymentDB); err != nil {
 		return err
 	}
-	return rs.Tx().Model(payment).Delete()
+
+	var paymentAttributesDB PaymentAttributeDB
+	if err := rs.Tx().Select().Model(paymentDB.PaymentAttributeId, &paymentAttributesDB); err != nil {
+		return err
+	}
+
+	var chargesInformationDB ChargesInformationDB
+	if err := rs.Tx().Select().Model(paymentAttributesDB.ChargesInformationId, &chargesInformationDB); err != nil {
+		return err
+	}
+
+	// Delete all models in the Database
+	if _, err := rs.Tx().Delete("payment", dbx.HashExp{"id": id}).Execute(); err != nil {
+		return err
+	}
+
+	if _, err := rs.Tx().Delete("payment_attribute", dbx.HashExp{"id": paymentAttributesDB.Id}).Execute(); err != nil {
+		return err
+	}
+
+	if _, err := rs.Tx().Delete("party", dbx.In("id", paymentAttributesDB.BeneficiaryPartyId,
+		paymentAttributesDB.SponsorPartyId, paymentAttributesDB.DebtorPartyId)).Execute(); err != nil {
+		return err
+	}
+
+	if _, err := rs.Tx().Delete("fx", dbx.HashExp{"id": paymentAttributesDB.FxId}).Execute(); err != nil {
+		return err
+	}
+
+	if _, err := rs.Tx().Delete("charges_information", dbx.HashExp{"id": paymentAttributesDB.ChargesInformationId}).Execute(); err != nil {
+		return err
+	}
+
+	if _, err := rs.Tx().Delete("sender_charge", dbx.HashExp{"id": paymentAttributesDB.ChargesInformationId}).Execute(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Count returns the number of the payment records in the database.
@@ -154,10 +192,16 @@ func (dao *PaymentDAO) Count(rs app.RequestScope) (int, error) {
 
 // Query retrieves the payment records with the specified offset and limit from the database.
 func (dao *PaymentDAO) Query(rs app.RequestScope, offset, limit int) ([]dtos.Payment, error) {
-
-	// TODO
+	var paymentsDB []PaymentDB
+	err := rs.Tx().Select("id").OrderBy("id").Offset(int64(offset)).Limit(int64(limit)).All(&paymentsDB)
 
 	var payments []dtos.Payment
-	err := rs.Tx().Select().OrderBy("id").Offset(int64(offset)).Limit(int64(limit)).All(&payments)
+	for _, paymentDB := range paymentsDB {
+		payment, err := dao.getSimple(rs, paymentDB.Id)
+		if err != nil {
+			return nil, err
+		}
+		payments = append(payments, *payment)
+	}
 	return payments, err
 }
