@@ -1,6 +1,5 @@
 package daos
 
-/*
 import (
 	"testing"
 
@@ -100,4 +99,3 @@ func TestPaymentDAO(t *testing.T) {
 		})
 	}
 }
-*/

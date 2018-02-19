@@ -1,6 +1,5 @@
 package services
 
-/*
 import (
 	"errors"
 	"testing"
@@ -160,4 +159,3 @@ func (m *mockPaymentDAO) Delete(rs app.RequestScope, id int) error {
 	}
 	return errors.New("not found")
 }
-*/

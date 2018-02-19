@@ -1,8 +1,6 @@
 package daos
 
 import (
-	"time"
-
 	"github.com/rogersole/payments-basic-api/dtos"
 	uuid "github.com/satori/go.uuid"
 )
@@ -21,6 +19,77 @@ type PartyDB struct {
 
 func (c PartyDB) TableName() string {
 	return "party"
+}
+
+type ChargesInformationDB struct {
+	Id                      int64
+	BearerCode              string
+	ReceiverChargesAmount   string
+	ReceiverChargesCurrency string
+}
+
+func (c ChargesInformationDB) TableName() string {
+	return "charges_information"
+}
+
+type SenderChargeDB struct {
+	Id                   int64
+	Amount               string
+	Currency             string
+	ChargesInformationId int64
+}
+
+func (c SenderChargeDB) TableName() string {
+	return "sender_charge"
+}
+
+type FxDB struct {
+	Id                int64
+	ContractReference string
+	ExchangeRate      string
+	OriginalAmount    string
+	OriginalCurrency  string
+}
+
+func (c FxDB) TableName() string {
+	return "fx"
+}
+
+type PaymentAttributeDB struct {
+	Id                   int64
+	Amount               string
+	Currency             string
+	EndToEndReference    string
+	NumericReference     string
+	PaymentId            string
+	PaymentPurpose       string
+	PaymentScheme        string
+	PaymentType          string
+	ProcessingDate       string
+	Reference            string
+	SchemePaymentSubType string
+	SchemePaymentType    string
+	ChargesInformationId int64
+	BeneficiaryPartyId   int64
+	DebtorPartyId        int64
+	SponsorPartyId       int64
+	FxId                 int64
+}
+
+func (c PaymentAttributeDB) TableName() string {
+	return "payment_attribute"
+}
+
+type PaymentDB struct {
+	Id                 uuid.UUID
+	Type               string
+	Version            int
+	OrganisationId     uuid.UUID
+	PaymentAttributeId int64
+}
+
+func (c PaymentDB) TableName() string {
+	return "payment"
 }
 
 func NewPartyDB(dto *dtos.Party) PartyDB {
@@ -49,17 +118,6 @@ func NewParty(partyDB *PartyDB) *dtos.Party {
 	}
 }
 
-type ChargesInformationDB struct {
-	Id                      int64
-	BearerCode              string
-	ReceiverChargesAmount   string
-	ReceiverChargesCurrency string
-}
-
-func (c ChargesInformationDB) TableName() string {
-	return "charges_information"
-}
-
 func NewChargesInformationDB(dto *dtos.ChargesInformation) ChargesInformationDB {
 	return ChargesInformationDB{
 		BearerCode:              dto.BearerCode,
@@ -84,17 +142,6 @@ func NewChargesInformation(chargesInformationDB *ChargesInformationDB, sc []Send
 	}
 }
 
-type SenderChargeDB struct {
-	Id                   int64
-	Amount               string
-	Currency             string
-	ChargesInformationId int64
-}
-
-func (c SenderChargeDB) TableName() string {
-	return "sender_charge"
-}
-
 func NewSenderChargeDB(dto *dtos.Charge) SenderChargeDB {
 	return SenderChargeDB{
 		Amount:   dto.Amount,
@@ -107,18 +154,6 @@ func NewSenderCharge(senderChargeDB *SenderChargeDB) *dtos.Charge {
 		Amount:   senderChargeDB.Amount,
 		Currency: senderChargeDB.Currency,
 	}
-}
-
-type FxDB struct {
-	Id                int64
-	ContractReference string
-	ExchangeRate      string
-	OriginalAmount    string
-	OriginalCurrency  string
-}
-
-func (c FxDB) TableName() string {
-	return "fx"
 }
 
 func NewFxDB(dto *dtos.FX) FxDB {
@@ -139,31 +174,6 @@ func NewFx(fxDB *FxDB) *dtos.FX {
 	}
 }
 
-type PaymentAttributeDB struct {
-	Id                   int64
-	Amount               string
-	Currency             string
-	EndToEndReference    string
-	NumericReference     string
-	PaymentId            string
-	PaymentPurpose       string
-	PaymentScheme        string
-	PaymentType          string
-	ProcessingDate       time.Time
-	Reference            string
-	SchemePaymentSubType string
-	SchemePaymentType    string
-	ChargesInformationId int64
-	BeneficiaryPartyId   int64
-	DebtorPartyId        int64
-	SponsorPartyId       int64
-	FxId                 int64
-}
-
-func (c PaymentAttributeDB) TableName() string {
-	return "payment_attribute"
-}
-
 func NewPaymentAttributeDB(dto *dtos.PaymentAttributes) PaymentAttributeDB {
 	return PaymentAttributeDB{
 		Amount:               dto.Amount,
@@ -174,7 +184,7 @@ func NewPaymentAttributeDB(dto *dtos.PaymentAttributes) PaymentAttributeDB {
 		PaymentPurpose:       dto.PaymentPurpose,
 		PaymentScheme:        dto.PaymentScheme,
 		PaymentType:          dto.PaymentType,
-		ProcessingDate:       dto.ProcessingDate.Time,
+		ProcessingDate:       dto.ProcessingDate,
 		Reference:            dto.Reference,
 		SchemePaymentSubType: dto.SchemePaymentSubType,
 		SchemePaymentType:    dto.SchemePaymentType,
@@ -194,17 +204,15 @@ func NewPaymentAttributes(paymentAttributesDB *PaymentAttributeDB,
 	fx := NewFx(fxDB)
 
 	return &dtos.PaymentAttributes{
-		Amount:            paymentAttributesDB.Amount,
-		Currency:          paymentAttributesDB.Currency,
-		EndToEndReference: paymentAttributesDB.EndToEndReference,
-		NumericReference:  paymentAttributesDB.NumericReference,
-		PaymentId:         paymentAttributesDB.PaymentId,
-		PaymentPurpose:    paymentAttributesDB.PaymentPurpose,
-		PaymentScheme:     paymentAttributesDB.PaymentScheme,
-		PaymentType:       paymentAttributesDB.PaymentType,
-		ProcessingDate: dtos.CustomTime{
-			Time: paymentAttributesDB.ProcessingDate,
-		},
+		Amount:               paymentAttributesDB.Amount,
+		Currency:             paymentAttributesDB.Currency,
+		EndToEndReference:    paymentAttributesDB.EndToEndReference,
+		NumericReference:     paymentAttributesDB.NumericReference,
+		PaymentId:            paymentAttributesDB.PaymentId,
+		PaymentPurpose:       paymentAttributesDB.PaymentPurpose,
+		PaymentScheme:        paymentAttributesDB.PaymentScheme,
+		PaymentType:          paymentAttributesDB.PaymentType,
+		ProcessingDate:       paymentAttributesDB.ProcessingDate,
 		Reference:            paymentAttributesDB.Reference,
 		SchemePaymentSubType: paymentAttributesDB.SchemePaymentSubType,
 		SchemePaymentType:    paymentAttributesDB.SchemePaymentType,
@@ -214,18 +222,6 @@ func NewPaymentAttributes(paymentAttributesDB *PaymentAttributeDB,
 		SponsorParty:         sponsorParty,
 		FX:                   fx,
 	}
-}
-
-type PaymentDB struct {
-	Id                 uuid.UUID
-	Type               string
-	Version            int
-	OrganisationId     uuid.UUID
-	PaymentAttributeId int64
-}
-
-func (c PaymentDB) TableName() string {
-	return "payment"
 }
 
 func NewPayment(paymentDB *PaymentDB, paymentAttributesDB *PaymentAttributeDB,

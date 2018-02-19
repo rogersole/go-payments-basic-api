@@ -147,7 +147,7 @@ func (dao *PaymentDAO) Update(rs app.RequestScope, id uuid.UUID, payment *dtos.P
 	}
 
 	paymentAttributesDB := NewPaymentAttributeDB(payment.Attributes)
-	paymentAttributesDB.Id = paymentDB.PaymentAttributeId
+	paymentAttributesDB.Id = paymentAttributesDBAux.Id
 	if err := rs.Tx().Model(&paymentAttributesDB).
 		Exclude("Id", "ChargesInformationId", "BeneficiaryPartyId",
 			"DebtorPartyId", "SponsorPartyId", "FxId").

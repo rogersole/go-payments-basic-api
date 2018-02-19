@@ -30,17 +30,27 @@ func init() {
 // ResetDB re-create the database schema and re-populate the initial data using the SQL statements in _db.sql.
 // This method is mainly used in tests.
 func ResetDB() *dbx.DB {
-	if err := runSQLFile(DB, getSQLFile()); err != nil {
+	if err := runSQLFile(DB, getStructureSQLFile()); err != nil {
 		panic(fmt.Errorf("error while initializing test database: %s", err))
+	}
+	if err := runSQLFile(DB, getDataSQLFile()); err != nil {
+		panic(fmt.Errorf("error while inserting in test database: %s", err))
 	}
 	return DB
 }
 
-func getSQLFile() string {
+func getStructureSQLFile() string {
 	if _, err := os.Stat("testdata/db_structure.sql"); err == nil {
 		return "testdata/db_structure.sql"
 	}
 	return "../testdata/db_structure.sql"
+}
+
+func getDataSQLFile() string {
+	if _, err := os.Stat("testdata/db_inserts.sql"); err == nil {
+		return "testdata/db_inserts.sql"
+	}
+	return "../testdata/db_inserts.sql"
 }
 
 func runSQLFile(db *dbx.DB, file string) error {

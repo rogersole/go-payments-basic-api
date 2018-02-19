@@ -1,39 +1,8 @@
 package dtos
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	"github.com/satori/go.uuid"
 )
-
-const ctLayout = "2006-01-02"
-
-type CustomTime struct {
-	time.Time
-}
-
-func (t *CustomTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", t.Time.Format(ctLayout))), nil
-}
-
-func (t *CustomTime) UnmarshalJSON(b []byte) error {
-	strInput := string(b)
-	strInput = strings.Trim(strInput, `"`)
-	newTime, err := time.Parse(ctLayout, strInput)
-	if err != nil {
-		return err
-	}
-
-	t.Time = newTime
-	fmt.Printf(">>>>> TIME: %v\n\n", t.Time)
-	return nil
-}
-
-func (t *CustomTime) String() string {
-	return t.Time.String()
-}
 
 // Payment represents a payment record
 type Payment struct {
@@ -53,7 +22,7 @@ type PaymentAttributes struct {
 	PaymentPurpose       string              `json:"payment_purpose"`
 	PaymentScheme        string              `json:"payment_scheme"`
 	PaymentType          string              `json:"payment_type"`
-	ProcessingDate       CustomTime          `json:"processing_date"`
+	ProcessingDate       string              `json:"processing_date"`
 	Reference            string              `json:"reference"`
 	SchemePaymentSubType string              `json:"scheme_payment_sub_type"`
 	SchemePaymentType    string              `json:"scheme_payment_type"`
@@ -95,10 +64,9 @@ type FX struct {
 }
 
 // Validate validates the Payment fields.
-func (m Payment) Validate() error {
-	//return validation.ValidateStruct(&m,
-	//	validation.Field(&m.Name, validation.Required, validation.Length(0, 120)),
+func (p Payment) Validate() error {
+	//return validation.ValidateStruct(&p,
+	//	validation.Field(&p.Version, validation.Required, validation.Length(0, 120)),
 	//)
 	return nil
-	// TODO: implement validation
 }
