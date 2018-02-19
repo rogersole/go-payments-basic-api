@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/rogersole/payments-basic-api/dtos"
+	uuid "github.com/satori/go.uuid"
 )
 
 type PartyDB struct {
@@ -136,10 +137,10 @@ func NewPaymentAttributeDB(dto *dtos.PaymentAttributes) PaymentAttributeDB {
 }
 
 type PaymentDB struct {
-	Id                 dtos.CustomUUID
+	Id                 uuid.UUID
 	Type               string
 	Version            int
-	OrganisationId     dtos.CustomUUID
+	OrganisationId     uuid.UUID
 	PaymentAttributeId int64
 }
 
@@ -151,6 +152,6 @@ func NewPaymentDB(dto *dtos.Payment) PaymentDB {
 	return PaymentDB{
 		Type:           dto.Type,
 		Version:        dto.Version,
-		OrganisationId: dto.OrganisationID,
+		OrganisationId: dto.OrganisationId,
 	}
 }

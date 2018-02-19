@@ -55,7 +55,7 @@ CREATE TABLE payment_attribute
   payment_purpose VARCHAR(255),
   payment_scheme VARCHAR(255),
   payment_type VARCHAR(255),
-  processing_date TIME,
+  processing_date TIME without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC'),
   reference VARCHAR(255),
   scheme_payment_sub_type VARCHAR(255),
   scheme_payment_type VARCHAR(255),

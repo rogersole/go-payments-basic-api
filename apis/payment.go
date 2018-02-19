@@ -5,16 +5,17 @@ import (
 	"github.com/go-ozzo/ozzo-routing"
 	"github.com/rogersole/payments-basic-api/app"
 	"github.com/rogersole/payments-basic-api/dtos"
+	"github.com/satori/go.uuid"
 )
 
 // paymentService specifies the interface for the payment service needed by serviceResource
 type paymentService interface {
-	Get(rs app.RequestScope, id dtos.CustomUUID) (*dtos.Payment, error)
+	Get(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, error)
 	Query(rs app.RequestScope, offset, limit int) ([]dtos.Payment, error)
 	Count(rs app.RequestScope) (int, error)
 	Create(rs app.RequestScope, model *dtos.Payment) (*dtos.Payment, error)
-	Update(rs app.RequestScope, id dtos.CustomUUID, model *dtos.Payment) (*dtos.Payment, error)
-	Delete(rs app.RequestScope, id dtos.CustomUUID) (*dtos.Payment, error)
+	Update(rs app.RequestScope, id uuid.UUID, model *dtos.Payment) (*dtos.Payment, error)
+	Delete(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, error)
 }
 
 // paymentResource defines the handlers for the CRUD APIs
@@ -33,7 +34,7 @@ func ServePaymentResource(rg *routing.RouteGroup, service paymentService) {
 }
 
 func (r *paymentResource) get(c *routing.Context) error {
-	id := dtos.NewCustomUUIDFromString(c.Param("id"))
+	id := uuid.Must(uuid.FromString(c.Param("id")))
 	response, err := r.service.Get(app.GetRequestScope(c), id)
 	if err != nil {
 		return err
@@ -73,7 +74,7 @@ func (r *paymentResource) create(c *routing.Context) error {
 }
 
 func (r *paymentResource) update(c *routing.Context) error {
-	id := dtos.NewCustomUUIDFromString(c.Param("id"))
+	id := uuid.Must(uuid.FromString(c.Param("id")))
 	rs := app.GetRequestScope(c)
 
 	model, err := r.service.Get(rs, id)
@@ -94,7 +95,7 @@ func (r *paymentResource) update(c *routing.Context) error {
 }
 
 func (r *paymentResource) delete(c *routing.Context) error {
-	id := dtos.NewCustomUUIDFromString(c.Param("id"))
+	id := uuid.Must(uuid.FromString(c.Param("id")))
 	response, err := r.service.Delete(app.GetRequestScope(c), id)
 	if err != nil {
 		return err
