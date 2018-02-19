@@ -3,8 +3,6 @@
 
 TODO:
 - date not stored property into PostgreSQL
-- daos/payment.go
-	- update
 - populate db with some test inserts	  	
 - tests
 - look for TODOs in the code

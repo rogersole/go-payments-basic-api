@@ -1,6 +1,8 @@
 package daos
 
 import (
+	"fmt"
+
 	"github.com/go-ozzo/ozzo-dbx"
 	"github.com/rogersole/payments-basic-api/app"
 	"github.com/rogersole/payments-basic-api/dtos"
@@ -42,11 +44,8 @@ func (dao *PaymentDAO) getSimple(rs app.RequestScope, id uuid.UUID) (*dtos.Payme
 	}
 
 	var senderChargesDB []SenderChargeDB
-	if err := rs.Tx().
-		Select().
-		From("sender_charge").
-		Where(dbx.NewExp("charges_information_id={:charges_info_id}",
-			dbx.Params{"charges_info_id": chargesInformationDB.Id})).
+	if err := rs.Tx().Select().From("sender_charge").Where(dbx.NewExp("charges_information_id={:charges_info_id}",
+		dbx.Params{"charges_info_id": chargesInformationDB.Id})).
 		All(&senderChargesDB); err != nil {
 		return nil, err
 	}
@@ -127,14 +126,83 @@ func (dao *PaymentDAO) Create(rs app.RequestScope, payment *dtos.Payment) error 
 
 // Update saves the changes to a payment in the database.
 func (dao *PaymentDAO) Update(rs app.RequestScope, id uuid.UUID, payment *dtos.Payment) error {
+	if id != payment.Id {
+		return fmt.Errorf("target update id is different from url one")
+	}
 
-	// TODO
-
-	if _, err := dao.Get(rs, id); err != nil {
+	var paymentDBAux PaymentDB
+	if err := rs.Tx().Select().Model(id, &paymentDBAux); err != nil {
 		return err
 	}
-	payment.Id = id
-	return rs.Tx().Model(payment).Exclude("Id").Update()
+
+	paymentDB := NewPaymentDB(payment)
+	paymentDB.Id = paymentDBAux.Id
+	if err := rs.Tx().Model(&paymentDB).Exclude("Id", "PaymentAttributeId").Update(); err != nil {
+		return err
+	}
+
+	var paymentAttributesDBAux PaymentAttributeDB
+	if err := rs.Tx().Select().Model(paymentDBAux.PaymentAttributeId, &paymentAttributesDBAux); err != nil {
+		return err
+	}
+
+	paymentAttributesDB := NewPaymentAttributeDB(payment.Attributes)
+	paymentAttributesDB.Id = paymentDB.PaymentAttributeId
+	if err := rs.Tx().Model(&paymentAttributesDB).
+		Exclude("Id", "ChargesInformationId", "BeneficiaryPartyId",
+			"DebtorPartyId", "SponsorPartyId", "FxId").
+		Update(); err != nil {
+		return err
+	}
+
+	fxDB := NewFxDB(payment.Attributes.FX)
+	fxDB.Id = paymentAttributesDBAux.FxId
+	if err := rs.Tx().Model(&fxDB).Exclude("Id").Update(); err != nil {
+		return err
+	}
+
+	chargesInformationDB := NewChargesInformationDB(payment.Attributes.ChargesInformation)
+	chargesInformationDB.Id = paymentAttributesDBAux.ChargesInformationId
+	if err := rs.Tx().Model(&chargesInformationDB).Exclude("Id").Update(); err != nil {
+		return err
+	}
+
+	var senderChargesDB []SenderChargeDB
+	if err := rs.Tx().Select().From("sender_charge").Where(dbx.NewExp("charges_information_id={:charges_info_id}",
+		dbx.Params{"charges_info_id": chargesInformationDB.Id})).
+		All(&senderChargesDB); err != nil {
+		return err
+	}
+
+	for idx, senderChargeDBAux := range senderChargesDB {
+		charge := payment.Attributes.ChargesInformation.SenderCharges[idx]
+		senderChargeDB := NewSenderChargeDB(charge)
+		senderChargeDB.Id = senderChargeDBAux.Id
+		if err := rs.Tx().Model(&senderChargeDB).
+			Exclude("Id", "ChargesInformationId").
+			Update(); err != nil {
+			return err
+		}
+	}
+
+	beneficiaryPartyDB := NewPartyDB(payment.Attributes.BeneficiaryParty)
+	beneficiaryPartyDB.Id = paymentAttributesDBAux.BeneficiaryPartyId
+	if err := rs.Tx().Model(&beneficiaryPartyDB).Exclude("Id").Update(); err != nil {
+		return err
+	}
+
+	debtorPartyDB := NewPartyDB(payment.Attributes.DebtorParty)
+	debtorPartyDB.Id = paymentAttributesDBAux.DebtorPartyId
+	if err := rs.Tx().Model(&debtorPartyDB).Exclude("Id").Update(); err != nil {
+		return err
+	}
+
+	sponsorPartyDB := NewPartyDB(payment.Attributes.SponsorParty)
+	sponsorPartyDB.Id = paymentAttributesDBAux.SponsorPartyId
+	if err := rs.Tx().Model(&sponsorPartyDB).Exclude("Id").Update(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Delete deletes a payment with the specified ID from the database.
@@ -176,7 +244,7 @@ func (dao *PaymentDAO) Delete(rs app.RequestScope, id uuid.UUID) error {
 		return err
 	}
 
-	if _, err := rs.Tx().Delete("sender_charge", dbx.HashExp{"id": paymentAttributesDB.ChargesInformationId}).Execute(); err != nil {
+	if _, err := rs.Tx().Delete("sender_charge", dbx.HashExp{"charges_information_id": paymentAttributesDB.ChargesInformationId}).Execute(); err != nil {
 		return err
 	}
 
