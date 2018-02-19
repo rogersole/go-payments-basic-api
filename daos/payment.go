@@ -17,7 +17,6 @@ func NewPaymentDAO() *PaymentDAO {
 
 // Get reads the payment with the specified ID from the database
 func (dao *PaymentDAO) Get(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, error) {
-
 	var paymentDB PaymentDB
 	if err := rs.Tx().Select().Model(id, &paymentDB); err != nil {
 		return nil, err
@@ -48,29 +47,9 @@ func (dao *PaymentDAO) Get(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, er
 		return nil, err
 	}
 
-	var senderCharges []dtos.Charge
-	for _, senderChargeDB := range senderChargesDB {
-		senderCharge := dtos.Charge{
-			Currency: senderChargeDB.Currency,
-			Amount:   senderChargeDB.Amount,
-		}
-		senderCharges = append(senderCharges, senderCharge)
-	}
-
 	var beneficiaryPartyDB PartyDB
 	if err := rs.Tx().Select().Model(paymentAttributesDB.BeneficiaryPartyId, &beneficiaryPartyDB); err != nil {
 		return nil, err
-	}
-
-	beneficiaryParty := dtos.Party{
-		AccountName:       beneficiaryPartyDB.AccountName,
-		AccountNumber:     beneficiaryPartyDB.AccountNumber,
-		AccountNumberCode: beneficiaryPartyDB.AccountNumberCode,
-		AccountType:       beneficiaryPartyDB.AccountType,
-		Address:           beneficiaryPartyDB.Address,
-		BankId:            beneficiaryPartyDB.BankId,
-		BankIdCode:        beneficiaryPartyDB.BankIdCode,
-		Name:              beneficiaryPartyDB.Name,
 	}
 
 	var debtorPartyDB PartyDB
@@ -78,122 +57,55 @@ func (dao *PaymentDAO) Get(rs app.RequestScope, id uuid.UUID) (*dtos.Payment, er
 		return nil, err
 	}
 
-	debtorParty := dtos.Party{
-		AccountName:       debtorPartyDB.AccountName,
-		AccountNumber:     debtorPartyDB.AccountNumber,
-		AccountNumberCode: debtorPartyDB.AccountNumberCode,
-		AccountType:       debtorPartyDB.AccountType,
-		Address:           debtorPartyDB.Address,
-		BankId:            debtorPartyDB.BankId,
-		BankIdCode:        debtorPartyDB.BankIdCode,
-		Name:              debtorPartyDB.Name,
-	}
-
 	var sponsorPartyDB PartyDB
 	if err := rs.Tx().Select().Model(paymentAttributesDB.SponsorPartyId, &sponsorPartyDB); err != nil {
 		return nil, err
 	}
 
-	sponsorParty := dtos.Party{
-		AccountName:       sponsorPartyDB.AccountName,
-		AccountNumber:     sponsorPartyDB.AccountNumber,
-		AccountNumberCode: sponsorPartyDB.AccountNumberCode,
-		AccountType:       sponsorPartyDB.AccountType,
-		Address:           sponsorPartyDB.Address,
-		BankId:            sponsorPartyDB.BankId,
-		BankIdCode:        sponsorPartyDB.BankIdCode,
-		Name:              sponsorPartyDB.Name,
-	}
+	payment := NewPayment(&paymentDB, &paymentAttributesDB, &chargesInformationDB,
+		senderChargesDB, &beneficiaryPartyDB, &debtorPartyDB, &sponsorPartyDB, &fxDB)
 
-	chargesInformation := dtos.ChargesInformation{
-		BearerCode:              chargesInformationDB.BearerCode,
-		SenderCharges:           senderCharges,
-		ReceiverChargesAmount:   chargesInformationDB.ReceiverChargesAmount,
-		ReceiverChargesCurrency: chargesInformationDB.ReceiverChargesCurrency,
-	}
-
-	fx := dtos.FX{
-		ContractReference: fxDB.ContractReference,
-		ExchangeRate:      fxDB.ExchangeRate,
-		OriginalAmount:    fxDB.OriginalAmount,
-		OriginalCurrency:  fxDB.OriginalCurrency,
-	}
-
-	paymentAttributes := dtos.PaymentAttributes{
-		Amount:            paymentAttributesDB.Amount,
-		Currency:          paymentAttributesDB.Currency,
-		EndToEndReference: paymentAttributesDB.EndToEndReference,
-		NumericReference:  paymentAttributesDB.NumericReference,
-		PaymentId:         paymentAttributesDB.PaymentId,
-		PaymentPurpose:    paymentAttributesDB.PaymentPurpose,
-		PaymentScheme:     paymentAttributesDB.PaymentScheme,
-		PaymentType:       paymentAttributesDB.PaymentType,
-		ProcessingDate: dtos.CustomTime{
-			Time: paymentAttributesDB.ProcessingDate,
-		},
-		Reference:            paymentAttributesDB.Reference,
-		SchemePaymentSubType: paymentAttributesDB.SchemePaymentSubType,
-		SchemePaymentType:    paymentAttributesDB.SchemePaymentType,
-		ChargesInformation:   chargesInformation,
-		BeneficiaryParty:     beneficiaryParty,
-		DebtorParty:          debtorParty,
-		SponsorParty:         sponsorParty,
-		FX:                   fx,
-	}
-
-	payment := dtos.Payment{
-		Id:             paymentDB.Id,
-		Version:        paymentDB.Version,
-		Type:           paymentDB.Type,
-		OrganisationId: paymentDB.OrganisationId,
-		Attributes:     paymentAttributes,
-	}
-
-	return &payment, nil
-
-	//var payment dtos.Payment
-	//err := rs.Tx().Select().Model(id, &payment)
-	//return &payment, err
+	return payment, nil
 }
 
 // Create saves a new payment record in the database.
 func (dao *PaymentDAO) Create(rs app.RequestScope, payment *dtos.Payment) error {
 	payment.Id = uuid.NewV4()
 
-	beneficiaryPartyDB := NewPartyDB(&payment.Attributes.BeneficiaryParty)
+	beneficiaryPartyDB := NewPartyDB(payment.Attributes.BeneficiaryParty)
 	if err := rs.Tx().Model(&beneficiaryPartyDB).Insert(); err != nil {
 		return err
 	}
 
-	debtorPartyDB := NewPartyDB(&payment.Attributes.DebtorParty)
+	debtorPartyDB := NewPartyDB(payment.Attributes.DebtorParty)
 	if err := rs.Tx().Model(&debtorPartyDB).Insert(); err != nil {
 		return err
 	}
 
-	sponsorPartyDB := NewPartyDB(&payment.Attributes.SponsorParty)
+	sponsorPartyDB := NewPartyDB(payment.Attributes.SponsorParty)
 	if err := rs.Tx().Model(&sponsorPartyDB).Insert(); err != nil {
 		return err
 	}
 
-	fxDB := NewFxDB(&payment.Attributes.FX)
+	fxDB := NewFxDB(payment.Attributes.FX)
 	if err := rs.Tx().Model(&fxDB).Insert(); err != nil {
 		return err
 	}
 
-	chargeInformationDB := NewChargesInformationDB(&payment.Attributes.ChargesInformation)
+	chargeInformationDB := NewChargesInformationDB(payment.Attributes.ChargesInformation)
 	if err := rs.Tx().Model(&chargeInformationDB).Insert(); err != nil {
 		return err
 	}
 
 	for _, senderCharge := range payment.Attributes.ChargesInformation.SenderCharges {
-		senderChargeDB := NewSenderChargeDB(&senderCharge)
+		senderChargeDB := NewSenderChargeDB(senderCharge)
 		senderChargeDB.ChargesInformationId = chargeInformationDB.Id
 		if err := rs.Tx().Model(&senderChargeDB).Insert(); err != nil {
 			return err
 		}
 	}
 
-	paymentAttributeDB := NewPaymentAttributeDB(&payment.Attributes)
+	paymentAttributeDB := NewPaymentAttributeDB(payment.Attributes)
 	paymentAttributeDB.ChargesInformationId = chargeInformationDB.Id
 	paymentAttributeDB.BeneficiaryPartyId = beneficiaryPartyDB.Id
 	paymentAttributeDB.DebtorPartyId = debtorPartyDB.Id

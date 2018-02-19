@@ -1,7 +1,6 @@
 package apis
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-ozzo/ozzo-routing"
 	"github.com/rogersole/payments-basic-api/app"
 	"github.com/rogersole/payments-basic-api/dtos"
@@ -63,8 +62,6 @@ func (r *paymentResource) create(c *routing.Context) error {
 	if err := c.Read(&model); err != nil {
 		return err
 	}
-	// TODO: remove following line!!
-	spew.Dump(model)
 	response, err := r.service.Create(app.GetRequestScope(c), &model)
 	if err != nil {
 		return err

@@ -37,31 +37,31 @@ func (t *CustomTime) String() string {
 
 // Payment represents a payment record
 type Payment struct {
-	Id             uuid.UUID         `json:"id"`
-	Version        int               `json:"version"`
-	OrganisationId uuid.UUID         `json:"organisation_id"`
-	Type           string            `json:"type"`
-	Attributes     PaymentAttributes `json:"attributes"`
+	Id             uuid.UUID          `json:"id"`
+	Version        int                `json:"version"`
+	OrganisationId uuid.UUID          `json:"organisation_id"`
+	Type           string             `json:"type"`
+	Attributes     *PaymentAttributes `json:"attributes"`
 }
 
 type PaymentAttributes struct {
-	Amount               string             `json:"amount"`
-	Currency             string             `json:"currency"`
-	EndToEndReference    string             `json:"end_to_end_reference"`
-	NumericReference     string             `json:"numeric_reference"`
-	PaymentId            string             `json:"payment_id"`
-	PaymentPurpose       string             `json:"payment_purpose"`
-	PaymentScheme        string             `json:"payment_scheme"`
-	PaymentType          string             `json:"payment_type"`
-	ProcessingDate       CustomTime         `json:"processing_date"`
-	Reference            string             `json:"reference"`
-	SchemePaymentSubType string             `json:"scheme_payment_sub_type"`
-	SchemePaymentType    string             `json:"scheme_payment_type"`
-	ChargesInformation   ChargesInformation `json:"charges_information"`
-	BeneficiaryParty     Party              `json:"beneficiary_party"`
-	DebtorParty          Party              `json:"debtor_party"`
-	SponsorParty         Party              `json:"sponsor_party"`
-	FX                   FX                 `json:"fx"`
+	Amount               string              `json:"amount"`
+	Currency             string              `json:"currency"`
+	EndToEndReference    string              `json:"end_to_end_reference"`
+	NumericReference     string              `json:"numeric_reference"`
+	PaymentId            string              `json:"payment_id"`
+	PaymentPurpose       string              `json:"payment_purpose"`
+	PaymentScheme        string              `json:"payment_scheme"`
+	PaymentType          string              `json:"payment_type"`
+	ProcessingDate       CustomTime          `json:"processing_date"`
+	Reference            string              `json:"reference"`
+	SchemePaymentSubType string              `json:"scheme_payment_sub_type"`
+	SchemePaymentType    string              `json:"scheme_payment_type"`
+	ChargesInformation   *ChargesInformation `json:"charges_information"`
+	BeneficiaryParty     *Party              `json:"beneficiary_party"`
+	DebtorParty          *Party              `json:"debtor_party"`
+	SponsorParty         *Party              `json:"sponsor_party"`
+	FX                   *FX                 `json:"fx"`
 }
 
 type Party struct {
@@ -76,10 +76,10 @@ type Party struct {
 }
 
 type ChargesInformation struct {
-	BearerCode              string   `json:"bearer_code"`
-	SenderCharges           []Charge `json:"sender_charges"`
-	ReceiverChargesAmount   string   `json:"receiver_charges_amount"`
-	ReceiverChargesCurrency string   `json:"receiver_charges_currency"`
+	BearerCode              string    `json:"bearer_code"`
+	SenderCharges           []*Charge `json:"sender_charges"`
+	ReceiverChargesAmount   string    `json:"receiver_charges_amount"`
+	ReceiverChargesCurrency string    `json:"receiver_charges_currency"`
 }
 
 type Charge struct {

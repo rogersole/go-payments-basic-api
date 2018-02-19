@@ -36,6 +36,19 @@ func NewPartyDB(dto *dtos.Party) PartyDB {
 	}
 }
 
+func NewParty(partyDB *PartyDB) *dtos.Party {
+	return &dtos.Party{
+		AccountName:       partyDB.AccountName,
+		AccountNumber:     partyDB.AccountNumber,
+		AccountNumberCode: partyDB.AccountNumberCode,
+		AccountType:       partyDB.AccountType,
+		Address:           partyDB.Address,
+		BankId:            partyDB.BankId,
+		BankIdCode:        partyDB.BankIdCode,
+		Name:              partyDB.Name,
+	}
+}
+
 type ChargesInformationDB struct {
 	Id                      int64
 	BearerCode              string
@@ -52,6 +65,22 @@ func NewChargesInformationDB(dto *dtos.ChargesInformation) ChargesInformationDB 
 		BearerCode:              dto.BearerCode,
 		ReceiverChargesAmount:   dto.ReceiverChargesAmount,
 		ReceiverChargesCurrency: dto.ReceiverChargesCurrency,
+	}
+}
+
+func NewChargesInformation(chargesInformationDB *ChargesInformationDB, sc []SenderChargeDB) *dtos.ChargesInformation {
+
+	var senderCharges []*dtos.Charge
+	for _, senderChargeDB := range sc {
+		senderCharge := NewSenderCharge(&senderChargeDB)
+		senderCharges = append(senderCharges, senderCharge)
+	}
+
+	return &dtos.ChargesInformation{
+		BearerCode:              chargesInformationDB.BearerCode,
+		SenderCharges:           senderCharges,
+		ReceiverChargesAmount:   chargesInformationDB.ReceiverChargesAmount,
+		ReceiverChargesCurrency: chargesInformationDB.ReceiverChargesCurrency,
 	}
 }
 
@@ -73,6 +102,13 @@ func NewSenderChargeDB(dto *dtos.Charge) SenderChargeDB {
 	}
 }
 
+func NewSenderCharge(senderChargeDB *SenderChargeDB) *dtos.Charge {
+	return &dtos.Charge{
+		Amount:   senderChargeDB.Amount,
+		Currency: senderChargeDB.Currency,
+	}
+}
+
 type FxDB struct {
 	Id                int64
 	ContractReference string
@@ -91,6 +127,15 @@ func NewFxDB(dto *dtos.FX) FxDB {
 		ExchangeRate:      dto.ExchangeRate,
 		OriginalAmount:    dto.OriginalAmount,
 		OriginalCurrency:  dto.OriginalCurrency,
+	}
+}
+
+func NewFx(fxDB *FxDB) *dtos.FX {
+	return &dtos.FX{
+		ContractReference: fxDB.ContractReference,
+		ExchangeRate:      fxDB.ExchangeRate,
+		OriginalAmount:    fxDB.OriginalAmount,
+		OriginalCurrency:  fxDB.OriginalCurrency,
 	}
 }
 
@@ -136,6 +181,41 @@ func NewPaymentAttributeDB(dto *dtos.PaymentAttributes) PaymentAttributeDB {
 	}
 }
 
+func NewPaymentAttributes(paymentAttributesDB *PaymentAttributeDB,
+	chargesInformationDB *ChargesInformationDB,
+	senderChargesDB []SenderChargeDB,
+	beneficiaryPartyDB *PartyDB, debtorPartyDB *PartyDB,
+	sponsorPartyDB *PartyDB, fxDB *FxDB) *dtos.PaymentAttributes {
+
+	chargesInformation := NewChargesInformation(chargesInformationDB, senderChargesDB)
+	beneficiaryParty := NewParty(beneficiaryPartyDB)
+	debtorParty := NewParty(debtorPartyDB)
+	sponsorParty := NewParty(sponsorPartyDB)
+	fx := NewFx(fxDB)
+
+	return &dtos.PaymentAttributes{
+		Amount:            paymentAttributesDB.Amount,
+		Currency:          paymentAttributesDB.Currency,
+		EndToEndReference: paymentAttributesDB.EndToEndReference,
+		NumericReference:  paymentAttributesDB.NumericReference,
+		PaymentId:         paymentAttributesDB.PaymentId,
+		PaymentPurpose:    paymentAttributesDB.PaymentPurpose,
+		PaymentScheme:     paymentAttributesDB.PaymentScheme,
+		PaymentType:       paymentAttributesDB.PaymentType,
+		ProcessingDate: dtos.CustomTime{
+			Time: paymentAttributesDB.ProcessingDate,
+		},
+		Reference:            paymentAttributesDB.Reference,
+		SchemePaymentSubType: paymentAttributesDB.SchemePaymentSubType,
+		SchemePaymentType:    paymentAttributesDB.SchemePaymentType,
+		ChargesInformation:   chargesInformation,
+		BeneficiaryParty:     beneficiaryParty,
+		DebtorParty:          debtorParty,
+		SponsorParty:         sponsorParty,
+		FX:                   fx,
+	}
+}
+
 type PaymentDB struct {
 	Id                 uuid.UUID
 	Type               string
@@ -146,6 +226,23 @@ type PaymentDB struct {
 
 func (c PaymentDB) TableName() string {
 	return "payment"
+}
+
+func NewPayment(paymentDB *PaymentDB, paymentAttributesDB *PaymentAttributeDB,
+	chargesInformationDB *ChargesInformationDB,
+	senderChargesDB []SenderChargeDB,
+	beneficiaryPartyDB *PartyDB, debtorPartyDB *PartyDB,
+	sponsorPartyDB *PartyDB, fxDB *FxDB) *dtos.Payment {
+
+	paymentAttributes := NewPaymentAttributes(paymentAttributesDB, chargesInformationDB, senderChargesDB,
+		beneficiaryPartyDB, debtorPartyDB, sponsorPartyDB, fxDB)
+	return &dtos.Payment{
+		Id:             paymentDB.Id,
+		Version:        paymentDB.Version,
+		Type:           paymentDB.Type,
+		OrganisationId: paymentDB.OrganisationId,
+		Attributes:     paymentAttributes,
+	}
 }
 
 func NewPaymentDB(dto *dtos.Payment) PaymentDB {
