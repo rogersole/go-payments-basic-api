@@ -1,0 +1,13 @@
+# The Data Source Name for the database
+# TODO: override this in production with the environment variable: PAYMENTS_DSN
+dsn: "postgres://postgres:postgres@127.0.0.1:5432/payments_basic_api?sslmode=disable"
+
+# These are secret keys used for JWT signing and verification.
+# TODO: override these keys in production with the environment variables:
+#   PAYMENTS_JWT_VERIFICATION_KEY
+#   PAYMENTS_JWT_SIGNING_KEY
+jwt_verification_key: "QfCAH04Cob7b71QCqy738vw5XGSnFZ9d"
+jwt_signing_key: "QfCAH04Cob7b71QCqy738vw5XGSnFZ9d"
+
+# The default signing method is HS256.
+#jwt_signing_method: "HS256"

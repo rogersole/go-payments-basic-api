@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5432
+
+  payments-basic-api:
+    image: ml-data-api
+    environment:
+      POSTGRES_URL: http://db:5432
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
