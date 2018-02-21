@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-ozzo/ozzo-dbx"
+	_ "github.com/lib/pq"
 	"github.com/rogersole/payments-basic-api/app"
 )
 

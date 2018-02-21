@@ -9,11 +9,9 @@ build:
 run:
 	make build
 	docker-compose up -d postgres
-	PAYMENTS_DSN=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable \
-	./payments-basic-api
+	PAYMENTS_DSN=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable ./payments-basic-api
 
 test:
 	docker-compose up -d postgres
 	sleep 3
-	PAYMENTS_DSN=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable \
-	go test ./...
+	PAYMENTS_DSN=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable go test ./...

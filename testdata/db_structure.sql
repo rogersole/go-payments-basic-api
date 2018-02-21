@@ -1,4 +1,4 @@
-CREATE TABLE party
+CREATE TABLE IF NOT EXISTS party
 (
   id SERIAL PRIMARY KEY,
   account_name VARCHAR(255),
@@ -11,7 +11,7 @@ CREATE TABLE party
   name VARCHAR(255)
 );
 
-CREATE TABLE charges_information
+CREATE TABLE IF NOT EXISTS charges_information
 (
   id SERIAL PRIMARY KEY,
   bearer_code VARCHAR(255),
@@ -19,7 +19,7 @@ CREATE TABLE charges_information
   receiver_charges_currency VARCHAR(255)
 );
 
-CREATE TABLE sender_charge
+CREATE TABLE IF NOT EXISTS sender_charge
 (
   id SERIAL PRIMARY KEY,
   amount VARCHAR(255),
@@ -28,7 +28,7 @@ CREATE TABLE sender_charge
   FOREIGN KEY (charges_information_id) REFERENCES charges_information (id) ON DELETE CASCADE
 );
 
-CREATE TABLE fx
+CREATE TABLE IF NOT EXISTS fx
 (
   id SERIAL PRIMARY KEY,
   contract_reference VARCHAR(255),
@@ -37,7 +37,7 @@ CREATE TABLE fx
   original_currency VARCHAR(255)
 );
 
-CREATE TABLE payment_attribute
+CREATE TABLE IF NOT EXISTS payment_attribute
 (
   id SERIAL PRIMARY KEY,
   amount VARCHAR(255),
@@ -65,7 +65,7 @@ CREATE TABLE payment_attribute
   FOREIGN KEY (fx_id) REFERENCES fx (id) ON DELETE CASCADE
 );
 
-CREATE TABLE payment
+CREATE TABLE IF NOT EXISTS payment
 (
   id UUID PRIMARY KEY,
   type VARCHAR(120) NOT NULL,

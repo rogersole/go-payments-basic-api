@@ -1,4 +1,3 @@
-
 INSERT INTO charges_information VALUES (1, 'SHAR', '1.00', 'USD');
 INSERT INTO charges_information VALUES (2, 'SHAR', '2.00', 'USD');
 INSERT INTO charges_information VALUES (3, 'SHAR', '3.00', 'USD');

@@ -1,6 +1,6 @@
 # The Data Source Name for the database
 # TODO: override this in production with the environment variable: PAYMENTS_DSN
-dsn: "postgres://postgres:postgres@127.0.0.1:5432/payments_basic_api?sslmode=disable"
+dsn: "postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable"
 
 # These are secret keys used for JWT signing and verification.
 # TODO: override these keys in production with the environment variables:
