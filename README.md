@@ -2,12 +2,7 @@
 
 
 TODO:
-- tests
-- docker with postgres to execute everything
-- makefile completed
 - design document
-- look for TODOs in the code
-- dep ensure before the last push
 
 - Decisions taken:
 	- Used relational database to try it out with Go, I could have used a nosql one to store the entire json and would have made it easier,

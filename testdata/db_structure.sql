@@ -1,10 +1,3 @@
-DROP TABLE IF EXISTS payment;
-DROP TABLE IF EXISTS payment_attribute;
-DROP TABLE IF EXISTS fx;
-DROP TABLE IF EXISTS sender_charge;
-DROP TABLE IF EXISTS charges_information;
-DROP TABLE IF EXISTS party;
-
 CREATE TABLE party
 (
   id SERIAL PRIMARY KEY,

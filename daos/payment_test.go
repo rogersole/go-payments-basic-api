@@ -96,6 +96,8 @@ func TestPaymentDAO(t *testing.T) {
 			assert.NotZero(t, count)
 		})
 	}
+
+	testdata.RemoveDB()
 }
 
 func newMockPaymentDTO(paymentId uuid.UUID, organisationId uuid.UUID, idx int) *dtos.Payment {

@@ -255,6 +255,8 @@ func TestPayment(t *testing.T) {
 	runAPITestsIgnoringResponseId(t, router, []apiTestCase{
 		{"t3 - create an artist", "POST", "/payments", string(paymentT3JSON), http.StatusOK, string(paymentT3JSON)},
 	})
+
+	testdata.RemoveDB()
 }
 
 func newInvalidMockPaymentDTO(paymentId uuid.UUID, idx int) *dtos.Payment {

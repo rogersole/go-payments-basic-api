@@ -2,13 +2,12 @@ package testdata
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/go-ozzo/ozzo-dbx"
 	_ "github.com/lib/pq" // initialize posgresql for test
 	"github.com/rogersole/payments-basic-api/app"
+	"github.com/rogersole/payments-basic-api/util"
 )
 
 var (
@@ -30,11 +29,24 @@ func init() {
 // ResetDB re-create the database schema and re-populate the initial data using the SQL statements in _db.sql.
 // This method is mainly used in tests.
 func ResetDB() *dbx.DB {
-	if err := runSQLFile(DB, getStructureSQLFile()); err != nil {
+	RemoveDB()
+	CreateDB()
+	if err := util.RunSQLFile(DB, getDataSQLFile()); err != nil {
+		panic(fmt.Errorf("error while inserting in test database: %s", err))
+	}
+	return DB
+}
+
+func CreateDB() *dbx.DB {
+	if err := util.RunSQLFile(DB, getStructureSQLFile()); err != nil {
 		panic(fmt.Errorf("error while initializing test database: %s", err))
 	}
-	if err := runSQLFile(DB, getDataSQLFile()); err != nil {
-		panic(fmt.Errorf("error while inserting in test database: %s", err))
+	return DB
+}
+
+func RemoveDB() *dbx.DB {
+	if err := util.RunSQLFile(DB, getDropSQLFile()); err != nil {
+		panic(fmt.Errorf("error while removing test database: %s", err))
 	}
 	return DB
 }
@@ -53,20 +65,9 @@ func getDataSQLFile() string {
 	return "../testdata/db_inserts.sql"
 }
 
-func runSQLFile(db *dbx.DB, file string) error {
-	s, err := ioutil.ReadFile(file)
-	if err != nil {
-		return err
+func getDropSQLFile() string {
+	if _, err := os.Stat("testdata/db_drops.sql"); err == nil {
+		return "testdata/db_drops.sql"
 	}
-	lines := strings.Split(string(s), ";")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-		if _, err := db.NewQuery(line).Execute(); err != nil {
-			return err
-		}
-	}
-	return nil
+	return "../testdata/db_drops.sql"
 }

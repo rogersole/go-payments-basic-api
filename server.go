@@ -15,6 +15,7 @@ import (
 	"github.com/rogersole/payments-basic-api/daos"
 	"github.com/rogersole/payments-basic-api/errors"
 	"github.com/rogersole/payments-basic-api/services"
+	_ "github.com/rogersole/payments-basic-api/util" // initialize database if does not exist
 	"github.com/sirupsen/logrus"
 )
 

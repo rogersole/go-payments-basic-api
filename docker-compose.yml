@@ -6,16 +6,16 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
 
-  payments-basic-api:
-    image: ml-data-api
-    environment:
-      POSTGRES_URL: http://db:5432
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
+#  payments-basic-api:
+#    image: payments-basic-api
+#    environment:
+#      PAYMENTS_DSN: postgres://postgres:postgres@postgres:5432/payments_basic_api?sslmode=disable \
+#    ports:
+#      - 8080:8080
+#    depends_on:
+#      - postgres
