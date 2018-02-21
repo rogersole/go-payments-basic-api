@@ -19,7 +19,7 @@ The example *Payment* object structure can be found [here](_docs/single_payment.
 
 Given the required methods, the API will look like (note that everything has been grouped under the `v1` path):
 
-- **Authentication:**
+#### **Authentication:**
 
 Authentication has been simplified for the exercise purposes, it uses a basic plain username/password content sent through Body in JSON format.
 
@@ -43,7 +43,7 @@ Authentication has been simplified for the exercise purposes, it uses a basic pl
 	  Returns `INTERNAL_SERVER_ERROR` format json as content
 
 	
-- **Healthcheck:**
+#### **Healthcheck:**
 
 Used to let external pieces (Load balancers, api gateways, service discoveries, etc...) to know whether the system is healthy or not.
 It's a simplified approach always returning `200 OK`, but the healthcheck should also perform basic resources access validation, such as database connectivity and so on to proof that system can handle requests correctly.
@@ -59,7 +59,7 @@ It's a simplified approach always returning `200 OK`, but the healthcheck should
 	- `500 INTERNAL_SERVER_ERROR`: When something goes wrong in the system  
       Returns `INTERNAL_SERVER_ERROR` format json as content
 
-- **Fetch a payment resource:**
+#### **Fetch a payment resource:**
 
 Used to retrieve and specific Payment information
 
@@ -78,7 +78,7 @@ Used to retrieve and specific Payment information
 	  Returns `INTERNAL_SERVER_ERROR` format json as content
 		
 	
-- **Create a payment resource:** 
+#### **Create a payment resource:** 
 
 Used to create a new payment resource. It automatically generates all the needed resources in the database.
 
@@ -98,7 +98,7 @@ Used to create a new payment resource. It automatically generates all the needed
 	  Returns `INTERNAL_SERVER_ERROR` format json as content
 
 	
-- **Update a payment resource:**
+#### **Update a payment resource:**
 
 Used to update an existing payment resource.
 
@@ -120,7 +120,7 @@ Used to update an existing payment resource.
 	  It is also returned when URL `{payment_id}` is different from the body content one  
 	  Returns `INTERNAL_SERVER_ERROR` format json as content
  
-- **Delete a payment resource:**  
+#### **Delete a payment resource:**  
 
 Used to remove a payment resource and all its dependencies.
 
@@ -139,10 +139,9 @@ Used to remove a payment resource and all its dependencies.
 	  Returns `INTERNAL_SERVER_ERROR` format json as content
 
 	
-- **List a collection of payment resources:**
+#### **List a collection of payment resources:**
 
-Used to get the list of payments. It has been implemented with `pagination`, therefore, specific query params are  
-available.
+Used to get the list of payments. It has been implemented with `pagination`, therefore, specific query params are available.
 
   - Endpoint: `GET    /v1/payments[?page={page_number}&per_page={elements_per_page}]`
   - Headers: 
@@ -205,27 +204,22 @@ And have the following format:
 
 ### Database tables design
 
-The storage system chosen is `postgres`. Due to its popularity, open source approach and good performance, the election  
-was clear and easy. Another approach would have been to go for a NoSQL database to simply store the JSON resources as  
-documents and retrieve them all, but given that the Payment resource is a composition of different parts (which seem  
-to be managed by independent resources as well), the relation approach seemed more scalable to solve this exercise.
+The storage system chosen is `postgres`. Due to its popularity, open source approach and good performance, the election was clear and easy. Another approach would have been to go for a NoSQL database to simply store the JSON resources as documents and retrieve them all, but given that the Payment resource is a composition of different parts (which seem to be managed by independent resources as well), the relation approach seemed more scalable to solve this exercise.
 
-To design the database, the provided [example resource](./_docs/single_payment.json) has been analysed and the design
-and the resulting schema is the following one:
+To design the database, the provided [example resource](./_docs/single_payment.json) has been analysed and the design and the resulting schema is the following one:
 
 ![Database design](./_docs/db_design.png)
 
-Note:
- - a `charges information` can have multiple `sender charge` resources.
- - a `payment attribute` have exactly 3 `party` resources (Beneficiary, Debtor and Sponsor) 
+> Notes: 
+> - a `charges information` can have multiple `sender charge` resources.
+> - a `payment attribute` have exactly 3 `party` resources (Beneficiary, Debtor and Sponsor) 
 
 ## Implementation
 
 ### Programming language chosen and why
 
 The service has been developed in `Go`, version `1.10`.
-Even I feel comfortable about using Java, and I've been using a lot during my last years, I found interesting to solve  
-this exercise in Go to deep learn things related to language.
+Even I feel comfortable about using Java, and I've been using a lot during my last years, I found interesting to solve this exercise in Go to deep learn things related to language.
 
 ### Frameworks/libraries used
 
@@ -255,9 +249,7 @@ make run
 
 ### Code structure
 
-The code has a simple and completely isolated structure, based on MVC, using DAOs (Data Access Object) to communicate  
-with the storing system, DTOs (Data Transfer Object) to communicate with clients and Services to abstract the service   
-definition.
+The code has a simple and completely isolated structure, based on MVC, using DAOs (Data Access Object) to communicate with the storing system, DTOs (Data Transfer Object) to communicate with clients and Services to abstract the service definition.
 
 Given this structure, adding another resource would only imply adding things into:
 
@@ -269,18 +261,13 @@ Given this structure, adding another resource would only imply adding things int
 ### Decisions taken
 
 - Not using the exact same response format for the list of payments, but a one with pagination information instead.
-- Simplified date field to string since the POST is considered to be done by storage system once the insert is  
-  performed. But it depends on architectural designs not related to this exercise.
-- On `PUT` method, if resource is not found, it is not automatically created, as would be expected with `PUT` operation,   
-  it could be done, but it returns a not found and does nothing with the stored data.
+- Simplified date field to string since the POST is considered to be done by storage system once the insert is performed. But it depends on architectural designs not related to this exercise.
+- On `PUT` method, if resource is not found, it is not automatically created, as would be expected with `PUT` operation, it could be done, but it returns a not found and does nothing with the stored data.
 
 ## Further work
 
 - Build a proper db schema knowing all the involved data scope
 - In the paginated responses, build the `previous` and `next` links in the headers or in the body content
-- Model validation is only applied to check the `payment attributes` field is not null. It could be extended to all the  
-  model validation or change it for a json schema validation to force an specific data format when being sent to the  
-  server.
-- Change `account type` field from `int 0` to something that does not map as a Null or default value in the programming   
-  language.
+- Model validation is only applied to check the `payment attributes` field is not null. It could be extended to all the model validation or change it for a json schema validation to force an specific data format when being sent to the server.
+- Change `account type` field from `int 0` to something that does not map as a Null or default value in the programming language.
 - Extend healthcheck to perform storage checks or more complex functions
